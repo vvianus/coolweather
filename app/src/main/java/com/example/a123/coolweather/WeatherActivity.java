@@ -1,5 +1,6 @@
 package com.example.a123.coolweather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.a123.coolweather.gson.Forecast;
 import com.example.a123.coolweather.gson.Weather;
+import com.example.a123.coolweather.service.AutoUpdateService;
 import com.example.a123.coolweather.util.HttpUtil;
 import com.example.a123.coolweather.util.Utility;
 
@@ -181,14 +183,23 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if(weather != null && "ok".equals(weather.status)){
+                            //存储天气信息
                             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
                             editor.putString("weather",responseText);
                             Log.d("requestWeather","Put responseText");
                             editor.apply();
+
+                            //激活AutoUpdateService服务
+                            Intent intent = new Intent(WeatherActivity.this, AutoUpdateService.class);
+                            startService(intent);
+
+                            //展示天气
                             showWeatherInfo(weather);
+
                         }else {
                             Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
                         }
+                        //停止刷新动画
                         swipeRefresh.setRefreshing(false);
                     }
                 });
